@@ -1,9 +1,6 @@
 package courses
 
 import (
-	"context"
-	"database/sql"
-	"fmt"
 	"net/http"
 
 	mooc "github.com/JoseUgal/go-http-api/internal"
@@ -19,7 +16,7 @@ type createRequest struct {
 }
 
 // CreateHandler returns an HTTP handler for courses creation.
-func CreateHandler() gin.HandlerFunc {
+func CreateHandler( courseRepository mooc.CourseRepository) gin.HandlerFunc {
 	return func(ctx *gin.Context){
 		var req createRequest
 		if err := ctx.BindJSON(&req); err != nil {
@@ -27,40 +24,31 @@ func CreateHandler() gin.HandlerFunc {
 			return
 		}
 
-		course := mooc.NewCourse(req.ID, req.Name, req.Duration)
+		mooc.NewCourse(req.ID, req.Name, req.Duration)
 		// if err := Save(ctx, course); err != nil {
 		// 	ctx.JSON(http.StatusInternalServerError, err.Error())
 		// }
 
-		fmt.Println(course)
-		fmt.Println(course.Name(), course.Duration())
+	
 		ctx.Status(http.StatusCreated)
 	}
 }
 
-const (
-	dbUser = "jugal"
-	dbPass = "jugal"
-	dbHost = "localhost"
-	dbPort = "3306"
-	dbName = "jugal"
-)
-
 // Save persist the course on the database.
-func Save(ctx context.Context, course mooc.Course) error {
-	mysqlURI := fmt.Sprintf("%s:%s@tcp/(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
-	db, err := sql.Open("mysql", mysqlURI)
-	if( err != nil ){
-		return err
-	}
+// func Save(ctx context.Context, course mooc.Course) error {
+// 	mysqlURI := fmt.Sprintf("%s:%s@tcp/(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
+// 	db, err := sql.Open("mysql", mysqlURI)
+// 	if( err != nil ){
+// 		return err
+// 	}
 
-	type sqlCourse struct {
-		ID		 string `db:"id"`
-		Name 	 string `db:"name"`
-		Duration string `db:"duration"`
-	}
+// 	type sqlCourse struct {
+// 		ID		 string `db:"id"`
+// 		Name 	 string `db:"name"`
+// 		Duration string `db:"duration"`
+// 	}
 
-	fmt.Println(db)
+// 	fmt.Println(db)
 
-	return nil
-}
+// 	return nil
+// }
