@@ -25,7 +25,7 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-
+	
 	// courseRepository := mysql.NewCourseRepository(db)
 
 	srv := server.New(host, port, nil)
