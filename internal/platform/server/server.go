@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/JoseUgal/go-http-api/internal/platform/server/handler/courses"
 	"github.com/JoseUgal/go-http-api/internal/platform/server/handler/health"
 	"github.com/gin-gonic/gin"
 )
@@ -32,4 +33,5 @@ func (s *Server) Run() error {
 // Method to register all API routes
 func (s *Server) registerRoutes() {
 	s.engine.GET("/health", health.CheckHandler())
+	s.engine.POST("/courses", courses.CreateHandler())
 }
