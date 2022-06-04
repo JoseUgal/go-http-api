@@ -14,8 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestHandler_Create(t *testing.T){
-
+func TestHandler_Create(t *testing.T) {
 	courseRepository := new(storagemocks.CourseRepository)
 	courseRepository.On("Save", mock.Anything, mock.AnythingOfType("mooc.Course")).Return(nil)
 
@@ -23,10 +22,10 @@ func TestHandler_Create(t *testing.T){
 	r := gin.New()
 	r.POST("/courses", CreateHandler(courseRepository))
 
-	t.Run("given an invalid request it returns 400", func(t *testing.T){
+	t.Run("given an invalid request it returns 400", func(t *testing.T) {
 		createCourseReq := createRequest{
-			ID: 	"8a1c5cdc-ba57-34as-99d4-aa412d23456f",
-			Name: 	"Demo Course",
+			Name:     "Demo Course",
+			Duration: "10 months",
 		}
 
 		b, err := json.Marshal(createCourseReq)
@@ -44,10 +43,10 @@ func TestHandler_Create(t *testing.T){
 		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 	})
 
-	t.Run("given a valid request it returns 201", func(t *testing.T){
+	t.Run("given a valid request it returns 201", func(t *testing.T) {
 		createCourseReq := createRequest{
-			ID: 	  "8a1c5cdc-ba57-34as-99d4-aa412d23456f",
-			Name: 	  "Demo Course",
+			ID:       "8a1c5cdc-ba57-445a-994d-aa412d23723f",
+			Name:     "Demo Course",
 			Duration: "10 months",
 		}
 
@@ -58,7 +57,7 @@ func TestHandler_Create(t *testing.T){
 		require.NoError(t, err)
 
 		rec := httptest.NewRecorder()
-		r.ServeHTTP(rec, req)	
+		r.ServeHTTP(rec, req)
 
 		res := rec.Result()
 		defer res.Body.Close()
