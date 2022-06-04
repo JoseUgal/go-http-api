@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/JoseUgal/go-http-api/internal/platform/server"
+	"github.com/JoseUgal/go-http-api/internal/platform/storage/mysql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 const (
@@ -20,14 +22,14 @@ const (
 
 func Run() error {
 
-	mysqlURI := fmt.Sprintf("%s:%s@tcp/(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
-	_, err := sql.Open("mysql", mysqlURI)
+	mysqlURI := fmt.Sprintf("%s:%s@/%s", dbUser, dbPass, dbName)
+	db, err := sql.Open("mysql", mysqlURI)
 	if err != nil {
 		return err
 	}
 	
-	// courseRepository := mysql.NewCourseRepository(db)
+	courseRepository := mysql.NewCourseRepository(db)
 
-	srv := server.New(host, port, nil)
+	srv := server.New(host, port, courseRepository)
 	return srv.Run()
 }
