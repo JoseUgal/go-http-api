@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	mooc "github.com/JoseUgal/go-http-api/internal"
+	"github.com/JoseUgal/go-http-api/internal/creating"
 	"github.com/JoseUgal/go-http-api/internal/platform/server/handler/courses"
 	"github.com/JoseUgal/go-http-api/internal/platform/server/handler/health"
 	"github.com/gin-gonic/gin"
@@ -15,15 +15,15 @@ type Server struct {
 	httpAddr	string
 
 	// deps
-	courseRepository mooc.CourseRepository
+	creatingCourseService creating.CourseService
 }
 
-func New(host string, port uint, courseRepository mooc.CourseRepository) Server {
+func New(host string, port uint, creatingCourseService creating.CourseService) Server {
 	srv := Server{
 		engine: gin.New(),
 		httpAddr: fmt.Sprintf("%v:%v", host, port),
 
-		courseRepository: courseRepository,
+		creatingCourseService: creatingCourseService,
 	}
 
 	srv.registerRoutes()
@@ -39,5 +39,5 @@ func (s *Server) Run() error {
 // Method to register all API routes
 func (s *Server) registerRoutes() {
 	s.engine.GET("/health", health.CheckHandler())
-	s.engine.POST("/courses", courses.CreateHandler(s.courseRepository))
+	s.engine.POST("/courses", courses.CreateHandler(s.creatingCourseService))
 }
