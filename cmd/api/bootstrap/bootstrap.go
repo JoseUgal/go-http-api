@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	mooc "github.com/JoseUgal/go-http-api/internal"
 	"github.com/JoseUgal/go-http-api/internal/creating"
+	"github.com/JoseUgal/go-http-api/internal/increasing"
 	"github.com/JoseUgal/go-http-api/internal/platform/bus/inmemory"
 	"github.com/JoseUgal/go-http-api/internal/platform/server"
 	"github.com/JoseUgal/go-http-api/internal/platform/storage/mysql"
@@ -37,14 +39,23 @@ func Run() error {
 	// Create CommandBus
 	var (
 		commandBus = inmemory.NewCommandBus()
+		eventBus = inmemory.NewEventBus()
 	)
 
 	
 	courseRepository := mysql.NewCourseRepository(db, dbTimeout)
-	creatingCourseService := creating.NewCourseService(courseRepository)
+
+	creatingCourseService := creating.NewCourseService(courseRepository, eventBus)
+	increasingCourseCounterService := increasing.NewCourseCounterService()
 
 	createCourseCommandHandler := creating.NewCourseCommandHandler(creatingCourseService)
 	commandBus.Register(creating.CourseCommandType, createCourseCommandHandler)
+
+	eventBus.Subscribe(
+		mooc.CourseCreatedEventType,
+		creating.NewIncreaseCoursesCounterOnCourseCreated(increasingCourseCounterService),
+	)
+
 
 	ctx, srv := server.New(context.Background(), host, port, shutdownTimeout , commandBus)
 	return srv.Run(ctx)

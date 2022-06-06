@@ -11,8 +11,6 @@ import (
 
 	"github.com/JoseUgal/go-http-api/internal/platform/server/handler/courses"
 	"github.com/JoseUgal/go-http-api/internal/platform/server/handler/health"
-	"github.com/JoseUgal/go-http-api/internal/platform/server/middleware/logging"
-	"github.com/JoseUgal/go-http-api/internal/platform/server/middleware/recovery"
 	"github.com/JoseUgal/go-http-api/kit/command"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +27,7 @@ type Server struct {
 
 func New(ctx context.Context, host string, port uint, shutdownTimeout time.Duration, commandBus command.Bus ) (context.Context, Server) {
 	srv := Server{
-		engine: gin.New(),
+		engine: gin.Default(), // GIN with middleware [logging, recovery]
 		httpAddr: fmt.Sprintf("%v:%v", host, port),
 
 		shutdownTimeout: shutdownTimeout,
@@ -44,7 +42,7 @@ func New(ctx context.Context, host string, port uint, shutdownTimeout time.Durat
 
 // Method to register all API routes
 func (s *Server) registerRoutes() {
-	s.engine.Use(recovery.Middleware(), logging.Middleware())
+	//s.engine.Use(recovery.Middleware(), logging.Middleware())
 
 	s.engine.GET("/health", health.CheckHandler())
 	s.engine.POST("/courses", courses.CreateHandler(s.commandBus))
