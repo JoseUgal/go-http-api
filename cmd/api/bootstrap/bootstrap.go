@@ -1,8 +1,10 @@
 package bootstrap
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/JoseUgal/go-http-api/internal/creating"
 	"github.com/JoseUgal/go-http-api/internal/platform/bus/inmemory"
@@ -14,6 +16,7 @@ import (
 const (
 	host = "localhost"
 	port = 8080
+	shutdownTimeout = 10 * time.Second
 
 	dbUser = "root"
 	dbPass = ""
@@ -42,6 +45,6 @@ func Run() error {
 	createCourseCommandHandler := creating.NewCourseCommandHandler(creatingCourseService)
 	commandBus.Register(creating.CourseCommandType, createCourseCommandHandler)
 
-	srv := server.New(host, port, creatingCourseService)
-	return srv.Run()
+	ctx, srv := server.New(context.Background(), host, port, shutdownTimeout , commandBus)
+	return srv.Run(ctx)
 }

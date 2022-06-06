@@ -6,6 +6,7 @@ import (
 
 	mooc "github.com/JoseUgal/go-http-api/internal"
 	"github.com/JoseUgal/go-http-api/internal/creating"
+	"github.com/JoseUgal/go-http-api/kit/command"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +19,7 @@ type createRequest struct {
 }
 
 // CreateHandler returns an HTTP handler for courses creation.
-func CreateHandler( creatingCourseService creating.CourseService ) gin.HandlerFunc {
+func CreateHandler(commandBus command.Bus) gin.HandlerFunc {
 	return func(ctx *gin.Context){
 		var req createRequest
 		if err := ctx.BindJSON(&req); err != nil {
@@ -26,7 +27,11 @@ func CreateHandler( creatingCourseService creating.CourseService ) gin.HandlerFu
 			return
 		}
 
-		err :=  creatingCourseService.CreateCourse(ctx, req.ID, req.Name, req.Duration)
+		err :=  commandBus.Dispatch(ctx, creating.CreateCourseCommand(
+			req.ID,
+			req.Name,
+			req.Duration,
+		))
 		
 		if err != nil {
 			switch {
