@@ -23,6 +23,7 @@ const (
 	dbHost = "localhost"
 	dbPort = "3306"
 	dbName = "mooc"
+	dbTimeout = 5 * time.Second
 )
 
 func Run() error {
@@ -39,7 +40,7 @@ func Run() error {
 	)
 
 	
-	courseRepository := mysql.NewCourseRepository(db)
+	courseRepository := mysql.NewCourseRepository(db, dbTimeout)
 	creatingCourseService := creating.NewCourseService(courseRepository)
 
 	createCourseCommandHandler := creating.NewCourseCommandHandler(creatingCourseService)
