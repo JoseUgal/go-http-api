@@ -13,24 +13,20 @@ import (
 	"github.com/JoseUgal/go-http-api/internal/platform/server"
 	"github.com/JoseUgal/go-http-api/internal/platform/storage/mysql"
 	_ "github.com/go-sql-driver/mysql"
-)
-
-const (
-	host = "localhost"
-	port = 8080
-	shutdownTimeout = 10 * time.Second
-
-	dbUser = "root"
-	dbPass = ""
-	dbHost = "localhost"
-	dbPort = "3306"
-	dbName = "mooc"
-	dbTimeout = 5 * time.Second
+	"github.com/kelseyhightower/envconfig"
 )
 
 func Run() error {
 
-	mysqlURI := fmt.Sprintf("%s:%s@/%s", dbUser, dbPass, dbName)
+	var cfg config 
+	err := envconfig.Process("MOOC", &cfg)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(cfg)
+
+	mysqlURI := fmt.Sprintf("%s:%v@/%s", cfg.dbUser, cfg.dbPort, cfg.dbName)
 	db, err := sql.Open("mysql", mysqlURI)
 	if err != nil {
 		return err
@@ -43,7 +39,7 @@ func Run() error {
 	)
 
 	
-	courseRepository := mysql.NewCourseRepository(db, dbTimeout)
+	courseRepository := mysql.NewCourseRepository(db, cfg.dbTimeout)
 
 	creatingCourseService := creating.NewCourseService(courseRepository, eventBus)
 	increasingCourseCounterService := increasing.NewCourseCounterService()
@@ -57,6 +53,20 @@ func Run() error {
 	)
 
 
-	ctx, srv := server.New(context.Background(), host, port, shutdownTimeout , commandBus)
+	ctx, srv := server.New(context.Background(), cfg.Host, cfg.Port, cfg.ShutdownTimeout , commandBus)
 	return srv.Run(ctx)
+}
+
+type config struct {
+	// Server configuration
+	Host			string			`default:"localhost"`
+	Port			uint			`default:"8080"`
+	ShutdownTimeout	time.Duration	`default:"10s"`
+	// Database configuration
+	dbUser			string			`default:"root"`
+	dbPass			string			
+	dbHost			string			`default:"localhost"`
+	dbPort			uint			`default:"3306"`
+	dbName			string			`default:"mooc"`
+	dbTimeout		time.Duration	`default:"5s"`
 }
